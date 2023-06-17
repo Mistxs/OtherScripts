@@ -1,0 +1,110 @@
+import requests
+import json
+import datetime
+import pprint
+from config import headers, u_headers
+
+
+salon_id = 309926
+chain_id = 290446
+
+startdate = '2023-03-07'
+enddate = '2023-03-24'
+pretty_output = [{}]
+data_list = [{}]
+new_data_list = []
+now = datetime.date.today()
+services = {}
+
+
+def findalltrans():
+
+    url = f"https://api.yclients.com/api/v1/chain/{chain_id}/loyalty/transactions"
+
+    payload = json.dumps({
+        "created_after": f"{startdate}",
+        "created_before": f"{enddate}",
+        "types": [2],
+        "count": 1000
+    })
+    response = requests.request("GET", url, headers=u_headers, data=payload).json()
+
+    return response["data"]
+
+
+data = findalltrans()
+alltrans = []
+changetrans = []
+
+def read_visit(visit_id):
+    url = f"https://api.yclients.com/api/v1/visits/{visit_id}"
+    payload = {}
+    response = requests.request("GET", url, headers=u_headers, data=payload)
+    request_data = response.json()
+    visit_data = request_data["data"]
+    return visit_data["records"][0]["client"]["id"]
+
+
+def getcard(clid):
+    url = f"https://api.yclients.com/api/v1/loyalty/client_cards/{clid}"
+    payload = {}
+    response = requests.request("GET", url, headers=u_headers, data=payload).json()
+    return response["data"][0]["id"]
+
+
+def getoldcard_id():
+    for i in range(len(data)):
+        alltrans.append({})
+        alltrans[i]["id"] = data[i]["id"]
+        alltrans[i]["card_id"] = data[i]["card_id"]
+
+        # через визит получим клиента
+        clid = read_visit(data[i]["visit_id"])
+        print(clid)
+
+        #теперь получим карты клиента
+        card = getcard(clid)
+        print(card)
+
+        #теперь проверим, удалена эта карта или нет
+        if data[i]["card_id"] != card:
+            changetrans.append({})
+            changetrans[-1]["id"] = data[i]["id"]
+            changetrans[-1]["amount"] = data[i]["amount"]
+            changetrans[-1]["oldcard"] = data[i]["card_id"]
+            changetrans[-1]["newcard"] = card
+
+
+
+
+
+
+# getoldcard_id()
+
+changetrans = [{'id': 177498082, 'amount': 270, 'oldcard': 33935517, 'newcard': 49641794}, {'id': 177494719, 'amount': 160, 'oldcard': 49048377, 'newcard': 49641332}, {'id': 177487836, 'amount': 450, 'oldcard': 33933112, 'newcard': 49639456}, {'id': 177487757, 'amount': 100, 'oldcard': 33931466, 'newcard': 49641212}, {'id': 177468148, 'amount': 330, 'oldcard': 33935246, 'newcard': 49640948}, {'id': 177466458, 'amount': 300, 'oldcard': 43347121, 'newcard': 49641725}, {'id': 177459153, 'amount': 300, 'oldcard': 33934124, 'newcard': 49642507}, {'id': 177453756, 'amount': 550, 'oldcard': 49464385, 'newcard': 49636480}, {'id': 177387838, 'amount': 280, 'oldcard': 33935898, 'newcard': 49642431}, {'id': 177364878, 'amount': 300, 'oldcard': 33935430, 'newcard': 49641219}, {'id': 177364808, 'amount': 330, 'oldcard': 33935430, 'newcard': 49641219}, {'id': 177343359, 'amount': 150, 'oldcard': 33931840, 'newcard': 49641524}, {'id': 177343249, 'amount': 1350, 'oldcard': 33931840, 'newcard': 49641524}, {'id': 177342773, 'amount': 280, 'oldcard': 33931909, 'newcard': 49639717}, {'id': 177328877, 'amount': 434, 'oldcard': 33932210, 'newcard': 49641343}, {'id': 177314092, 'amount': 150, 'oldcard': 33933304, 'newcard': 49641146}, {'id': 177282233, 'amount': 135, 'oldcard': 49602724, 'newcard': 49637895}, {'id': 177251695, 'amount': 100, 'oldcard': 33932794, 'newcard': 49639529}, {'id': 177241119, 'amount': 140, 'oldcard': 43178954, 'newcard': 49642109}, {'id': 177240259, 'amount': 260, 'oldcard': 43178954, 'newcard': 49642109}, {'id': 177238029, 'amount': 150, 'oldcard': 33934423, 'newcard': 49640980}, {'id': 177224722, 'amount': 150, 'oldcard': 46196076, 'newcard': 49641306}, {'id': 177224451, 'amount': 300, 'oldcard': 33932449, 'newcard': 49642568}, {'id': 177213251, 'amount': 150, 'oldcard': 33932887, 'newcard': 49641240}, {'id': 177194299, 'amount': 175, 'oldcard': 49566470, 'newcard': 49636544}, {'id': 177133404, 'amount': 280, 'oldcard': 33957716, 'newcard': 49642584}, {'id': 177131410, 'amount': 65, 'oldcard': 43178953, 'newcard': 49641956}, {'id': 177131017, 'amount': 77, 'oldcard': 43107986, 'newcard': 49641153}, {'id': 177118462, 'amount': 110, 'oldcard': 33935784, 'newcard': 49641292}, {'id': 177116365, 'amount': 270, 'oldcard': 33932794, 'newcard': 49639529}, {'id': 177116006, 'amount': 210, 'oldcard': 33934580, 'newcard': 49641442}, {'id': 177115891, 'amount': 35, 'oldcard': 33932887, 'newcard': 49641240}, {'id': 177115741, 'amount': 770, 'oldcard': 33932794, 'newcard': 49639529}, {'id': 177110419, 'amount': 150, 'oldcard': 49048346, 'newcard': 49640740}, {'id': 177096186, 'amount': 25, 'oldcard': 49048503, 'newcard': 49642249}, {'id': 177096153, 'amount': 150, 'oldcard': 42852588, 'newcard': 49641845}, {'id': 177060137, 'amount': 140, 'oldcard': 42968119, 'newcard': 49641397}, {'id': 177060056, 'amount': 150, 'oldcard': 49399605, 'newcard': 49636477}, {'id': 177057993, 'amount': 50, 'oldcard': 33935457, 'newcard': 49642287}, {'id': 177026837, 'amount': 300, 'oldcard': 43105235, 'newcard': 49641909}, {'id': 177011188, 'amount': 154, 'oldcard': 33934370, 'newcard': 49641944}, {'id': 177011156, 'amount': 300, 'oldcard': 33931840, 'newcard': 49641524}, {'id': 177011066, 'amount': 210, 'oldcard': 33933370, 'newcard': 49641117}, {'id': 177010832, 'amount': 300, 'oldcard': 33933370, 'newcard': 49641117}, {'id': 176945539, 'amount': 245, 'oldcard': 43071481, 'newcard': 49641834}, {'id': 176945532, 'amount': 140, 'oldcard': 33934524, 'newcard': 49642457}, {'id': 176945337, 'amount': 78, 'oldcard': 34461854, 'newcard': 49640977}, {'id': 176945250, 'amount': 400, 'oldcard': 49523924, 'newcard': 49640840}, {'id': 176943814, 'amount': 160, 'oldcard': 33933006, 'newcard': 49642504}, {'id': 176943780, 'amount': 45, 'oldcard': 49530117, 'newcard': 49637535}, {'id': 176943756, 'amount': 270, 'oldcard': 33935572, 'newcard': 49641591}, {'id': 176943684, 'amount': 50, 'oldcard': 33934190, 'newcard': 49642258}, {'id': 176943669, 'amount': 125, 'oldcard': 49047279, 'newcard': 49640314}, {'id': 176943623, 'amount': 85, 'oldcard': 49512481, 'newcard': 49638009}, {'id': 176885842, 'amount': 155, 'oldcard': 49124910, 'newcard': 49641889}, {'id': 176884917, 'amount': 300, 'oldcard': 33935549, 'newcard': 49641249}, {'id': 176847502, 'amount': 205, 'oldcard': 49047647, 'newcard': 49640500}, {'id': 176847441, 'amount': 300, 'oldcard': 43105235, 'newcard': 49641909}, {'id': 176847242, 'amount': 165, 'oldcard': 44925195, 'newcard': 49640710}, {'id': 176826566, 'amount': 300, 'oldcard': 33934944, 'newcard': 49639050}, {'id': 176820960, 'amount': 50, 'oldcard': 49508162, 'newcard': 49636481}, {'id': 176820908, 'amount': 175, 'oldcard': 49508162, 'newcard': 49636481}, {'id': 176763657, 'amount': 76.59, 'oldcard': 49293047, 'newcard': 49641133}, {'id': 176763532, 'amount': 150, 'oldcard': 33933569, 'newcard': 49641443}, {'id': 176759019, 'amount': 60, 'oldcard': 45999934, 'newcard': 49641411}, {'id': 176753234, 'amount': 100, 'oldcard': 45999934, 'newcard': 49641411}, {'id': 176750886, 'amount': 135, 'oldcard': 33933339, 'newcard': 49642426}, {'id': 176738842, 'amount': 150, 'oldcard': 43178924, 'newcard': 49642622}, {'id': 176739027, 'amount': 67.5, 'oldcard': 43179198, 'newcard': 49642622}, {'id': 176727305, 'amount': 135, 'oldcard': 42855395, 'newcard': 49641974}, {'id': 176727203, 'amount': 50, 'oldcard': 43347121, 'newcard': 49641725}, {'id': 176727168, 'amount': 140, 'oldcard': 49048324, 'newcard': 49642257}, {'id': 176727134, 'amount': 135, 'oldcard': 49457252, 'newcard': 49637024}, {'id': 176721276, 'amount': 165, 'oldcard': 33932317, 'newcard': 49639628}, {'id': 176717137, 'amount': 250, 'oldcard': 33934296, 'newcard': 49642659}, {'id': 176668834, 'amount': 400, 'oldcard': 43179184, 'newcard': 49641201}, {'id': 176573378, 'amount': 135, 'oldcard': 49458891, 'newcard': 49636479}, {'id': 176554554, 'amount': 140, 'oldcard': 33933736, 'newcard': 49639355}, {'id': 176553016, 'amount': 210, 'oldcard': 33935983, 'newcard': 49642045}, {'id': 176552983, 'amount': 300, 'oldcard': 33933906, 'newcard': 49642231}, {'id': 176549597, 'amount': 150, 'oldcard': 44213234, 'newcard': 49641463}, {'id': 176547995, 'amount': 300, 'oldcard': 33933906, 'newcard': 49642231}, {'id': 176543407, 'amount': 150, 'oldcard': 49463900, 'newcard': 49640749}, {'id': 176527663, 'amount': 231, 'oldcard': 43178979, 'newcard': 49642069}, {'id': 176525522, 'amount': 25, 'oldcard': 33932327, 'newcard': 49642281}, {'id': 176525434, 'amount': 90, 'oldcard': 43179142, 'newcard': 49642720}, {'id': 176524184, 'amount': 65, 'oldcard': 44201428, 'newcard': 49640562}, {'id': 176523917, 'amount': 300, 'oldcard': 33934207, 'newcard': 49641147}, {'id': 176523823, 'amount': 55, 'oldcard': 43179142, 'newcard': 49642720}, {'id': 176491292, 'amount': 470, 'oldcard': 34477077, 'newcard': 49641935}, {'id': 176459167, 'amount': 320, 'oldcard': 33934658, 'newcard': 49641037}, {'id': 176459125, 'amount': 150, 'oldcard': 43179094, 'newcard': 49642256}, {'id': 176441023, 'amount': 196, 'oldcard': 33932875, 'newcard': 49641276}, {'id': 176440974, 'amount': 500, 'oldcard': 43179386, 'newcard': 49642432}, {'id': 176407317, 'amount': 182, 'oldcard': 43212783, 'newcard': 49642613}, {'id': 176404461, 'amount': 300, 'oldcard': 33934915, 'newcard': 49641868}, {'id': 176402165, 'amount': 300, 'oldcard': 33934407, 'newcard': 49639199}, {'id': 176388729, 'amount': 25, 'oldcard': 33933190, 'newcard': 49641158}, {'id': 176334762, 'amount': 250, 'oldcard': 33934431, 'newcard': 49639188}, {'id': 176330731, 'amount': 189, 'oldcard': 42968119, 'newcard': 49641397}, {'id': 176314202, 'amount': 75, 'oldcard': 49424513, 'newcard': 49636721}, {'id': 176313948, 'amount': 300, 'oldcard': 49424513, 'newcard': 49636721}, {'id': 176310067, 'amount': 80, 'oldcard': 33931981, 'newcard': 49639706}, {'id': 176309926, 'amount': 350, 'oldcard': 33931981, 'newcard': 49639706}, {'id': 176302223, 'amount': 300, 'oldcard': 33935951, 'newcard': 49641068}, {'id': 176264074, 'amount': 100, 'oldcard': 45493066, 'newcard': 49642210}, {'id': 176259975, 'amount': 75, 'oldcard': 34131973, 'newcard': 49641451}, {'id': 176255715, 'amount': 300, 'oldcard': 33933926, 'newcard': 49642455}, {'id': 176255650, 'amount': 200, 'oldcard': 33933926, 'newcard': 49642455}, {'id': 176249775, 'amount': 210, 'oldcard': 33934370, 'newcard': 49641944}, {'id': 176225704, 'amount': 50, 'oldcard': 49048341, 'newcard': 49640735}, {'id': 176223627, 'amount': 154, 'oldcard': 42968119, 'newcard': 49641397}, {'id': 176210957, 'amount': 260, 'oldcard': 33931840, 'newcard': 49641524}, {'id': 176202943, 'amount': 250, 'oldcard': 33934915, 'newcard': 49641868}, {'id': 176202873, 'amount': 370, 'oldcard': 33934915, 'newcard': 49641868}, {'id': 176200934, 'amount': 50, 'oldcard': 33934504, 'newcard': 49642200}, {'id': 176121260, 'amount': 330, 'oldcard': 33935976, 'newcard': 49642304}, {'id': 176121238, 'amount': 125, 'oldcard': 49048265, 'newcard': 49640724}, {'id': 176101692, 'amount': 17.5, 'oldcard': 43691098, 'newcard': 49640801}, {'id': 176078830, 'amount': 280, 'oldcard': 33935908, 'newcard': 49642415}, {'id': 176040563, 'amount': 170, 'oldcard': 33934438, 'newcard': 49642196}, {'id': 176040532, 'amount': 200, 'oldcard': 33934438, 'newcard': 49642196}, {'id': 176040496, 'amount': 85, 'oldcard': 33933350, 'newcard': 49641307}, {'id': 176038119, 'amount': 135, 'oldcard': 49048268, 'newcard': 49641554}, {'id': 176027308, 'amount': 150, 'oldcard': 33935973, 'newcard': 49641346}, {'id': 176027279, 'amount': 150, 'oldcard': 33935973, 'newcard': 49641346}, {'id': 176005877, 'amount': 112.5, 'oldcard': 34461854, 'newcard': 49640977}, {'id': 176005834, 'amount': 240, 'oldcard': 49048517, 'newcard': 49641761}, {'id': 175953700, 'amount': 225, 'oldcard': 43573135, 'newcard': 49642676}, {'id': 175919674, 'amount': 75, 'oldcard': 49048315, 'newcard': 49642682}, {'id': 175910006, 'amount': 105, 'oldcard': 42852588, 'newcard': 49641845}, {'id': 175909381, 'amount': 70, 'oldcard': 49048299, 'newcard': 49641202}, {'id': 175888551, 'amount': 50, 'oldcard': 43178983, 'newcard': 49641049}, {'id': 175875106, 'amount': 77, 'oldcard': 33934370, 'newcard': 49641944}, {'id': 175842658, 'amount': 125, 'oldcard': 49345700, 'newcard': 49637411}, {'id': 175828432, 'amount': 75, 'oldcard': 45852915, 'newcard': 49642089}, {'id': 175820623, 'amount': 1400, 'oldcard': 43105235, 'newcard': 49641909}, {'id': 175820213, 'amount': 189, 'oldcard': 33934524, 'newcard': 49642457}, {'id': 175791085, 'amount': 75, 'oldcard': 49346358, 'newcard': 49640837}, {'id': 175789525, 'amount': 350, 'oldcard': 33932300, 'newcard': 49641160}, {'id': 175789489, 'amount': 300, 'oldcard': 33932300, 'newcard': 49641160}, {'id': 175782053, 'amount': 130, 'oldcard': 33933370, 'newcard': 49641117}, {'id': 175742110, 'amount': 245, 'oldcard': 33931874, 'newcard': 49639730}, {'id': 175741729, 'amount': 40, 'oldcard': 43105235, 'newcard': 49641909}, {'id': 175741691, 'amount': 189, 'oldcard': 33935861, 'newcard': 49641987}, {'id': 175736272, 'amount': 270, 'oldcard': 33934337, 'newcard': 49641243}, {'id': 175734298, 'amount': 168, 'oldcard': 42883485, 'newcard': 49641717}, {'id': 175716760, 'amount': 210, 'oldcard': 43179118, 'newcard': 49641712}, {'id': 175716684, 'amount': 55, 'oldcard': 42867790, 'newcard': 49642241}, {'id': 175689889, 'amount': 150, 'oldcard': 43178957, 'newcard': 49640318}, {'id': 175685009, 'amount': 200, 'oldcard': 33935517, 'newcard': 49641794}, {'id': 175683968, 'amount': 125, 'oldcard': 49048428, 'newcard': 49640759}, {'id': 175683850, 'amount': 300, 'oldcard': 33933926, 'newcard': 49642455}, {'id': 175657077, 'amount': 300, 'oldcard': 33934438, 'newcard': 49642196}, {'id': 175656640, 'amount': 75, 'oldcard': 49267251, 'newcard': 49640838}, {'id': 175615099, 'amount': 135, 'oldcard': 44864355, 'newcard': 49640859}, {'id': 175609519, 'amount': 150, 'oldcard': 44864355, 'newcard': 49640859}, {'id': 175551906, 'amount': 196, 'oldcard': 33933965, 'newcard': 49642740}, {'id': 175544652, 'amount': 50, 'oldcard': 43178987, 'newcard': 49640560}, {'id': 175541037, 'amount': 280, 'oldcard': 33935485, 'newcard': 49642103}, {'id': 175540799, 'amount': 300, 'oldcard': 33935485, 'newcard': 49642103}, {'id': 175536778, 'amount': 100, 'oldcard': 33931926, 'newcard': 49640929}, {'id': 175522300, 'amount': 225, 'oldcard': 49156406, 'newcard': 49636468}, {'id': 175521922, 'amount': 105, 'oldcard': 43179152, 'newcard': 49642061}, {'id': 175521765, 'amount': 231, 'oldcard': 33931940, 'newcard': 49640973}, {'id': 175467852, 'amount': 75, 'oldcard': 49048298, 'newcard': 49640726}, {'id': 175467768, 'amount': 189, 'oldcard': 43179152, 'newcard': 49642061}, {'id': 175445795, 'amount': 189, 'oldcard': 34461854, 'newcard': 49640977}, {'id': 175445727, 'amount': 275, 'oldcard': 49140214, 'newcard': 49636465}, {'id': 175439166, 'amount': 75, 'oldcard': 49140214, 'newcard': 49636465}, {'id': 175421121, 'amount': 50, 'oldcard': 33931782, 'newcard': 49640905}, {'id': 175420789, 'amount': 40, 'oldcard': 49177077, 'newcard': 49636469}, {'id': 175419762, 'amount': 50, 'oldcard': 33931782, 'newcard': 49640905}, {'id': 175419713, 'amount': 125, 'oldcard': 33935544, 'newcard': 49638833}, {'id': 175419672, 'amount': 140, 'oldcard': 49048367, 'newcard': 49641754}, {'id': 175419600, 'amount': 125, 'oldcard': 43179080, 'newcard': 49641447}, {'id': 175360481, 'amount': 525, 'oldcard': 46032348, 'newcard': 49642758}, {'id': 175276791, 'amount': 40, 'oldcard': 42867790, 'newcard': 49642241}, {'id': 175276737, 'amount': 150, 'oldcard': 33934407, 'newcard': 49639199}, {'id': 175276084, 'amount': 203, 'oldcard': 42973923, 'newcard': 49641902}, {'id': 175276022, 'amount': 91, 'oldcard': 42973923, 'newcard': 49641902}, {'id': 175275902, 'amount': 100, 'oldcard': 33932847, 'newcard': 49641895}, {'id': 175275612, 'amount': 77, 'oldcard': 43728993, 'newcard': 49642219}, {'id': 175275423, 'amount': 210, 'oldcard': 33931848, 'newcard': 49639740}, {'id': 175275156, 'amount': 280, 'oldcard': 33934944, 'newcard': 49639050}, {'id': 175275073, 'amount': 550, 'oldcard': 33934944, 'newcard': 49639050}, {'id': 175274935, 'amount': 250, 'oldcard': 33935513, 'newcard': 49641008}, {'id': 175274705, 'amount': 450, 'oldcard': 33935430, 'newcard': 49641219}, {'id': 175274684, 'amount': 750, 'oldcard': 33931867, 'newcard': 49639410}, {'id': 175274577, 'amount': 280, 'oldcard': 33933256, 'newcard': 49640971}, {'id': 175274463, 'amount': 100, 'oldcard': 49048326, 'newcard': 49641138}, {'id': 175274404, 'amount': 75, 'oldcard': 43178957, 'newcard': 49640318}, {'id': 175274327, 'amount': 600, 'oldcard': 33935066, 'newcard': 49642280}, {'id': 175273994, 'amount': 250, 'oldcard': 33935430, 'newcard': 49641219}, {'id': 175273872, 'amount': 150, 'oldcard': 33935572, 'newcard': 49641591}, {'id': 175273823, 'amount': 300, 'oldcard': 33935572, 'newcard': 49641591}, {'id': 175273774, 'amount': 240, 'oldcard': 33935572, 'newcard': 49641591}, {'id': 175273587, 'amount': 50, 'oldcard': 43043286, 'newcard': 49641097}, {'id': 175273344, 'amount': 100, 'oldcard': 33934305, 'newcard': 49641165}, {'id': 175272827, 'amount': 250, 'oldcard': 33935976, 'newcard': 49642304}, {'id': 175266181, 'amount': 140, 'oldcard': 43179209, 'newcard': 49642462}, {'id': 175265099, 'amount': 280, 'oldcard': 33934078, 'newcard': 49641449}, {'id': 175211782, 'amount': 75, 'oldcard': 49072213, 'newcard': 49636913}, {'id': 175211732, 'amount': 168, 'oldcard': 42960697, 'newcard': 49641142}, {'id': 175211730, 'amount': 270, 'oldcard': 33932449, 'newcard': 49642568}, {'id': 175199372, 'amount': 125, 'oldcard': 33932898, 'newcard': 49642617}, {'id': 175188556, 'amount': 125, 'oldcard': 49048299, 'newcard': 49641202}, {'id': 175188546, 'amount': 125, 'oldcard': 49048299, 'newcard': 49641202}, {'id': 175186834, 'amount': 40, 'oldcard': 33932898, 'newcard': 49642617}, {'id': 175185233, 'amount': 165, 'oldcard': 44769122, 'newcard': 49642239}, {'id': 175178687, 'amount': 375, 'oldcard': 43178958, 'newcard': 49641490}, {'id': 175160951, 'amount': 150, 'oldcard': 33935066, 'newcard': 49642280}, {'id': 175160799, 'amount': 220, 'oldcard': 33935066, 'newcard': 49642280}, {'id': 175135402, 'amount': 330, 'oldcard': 33933366, 'newcard': 49641577}, {'id': 175135303, 'amount': 280, 'oldcard': 33931867, 'newcard': 49639410}, {'id': 175121639, 'amount': 1100, 'oldcard': 33932300, 'newcard': 49641160}, {'id': 175118930, 'amount': 280, 'oldcard': 33933058, 'newcard': 49639467}, {'id': 175098195, 'amount': 105, 'oldcard': 42883485, 'newcard': 49641717}, {'id': 175074888, 'amount': 125, 'oldcard': 43179025, 'newcard': 49641651}, {'id': 175074394, 'amount': 150, 'oldcard': 43179025, 'newcard': 49641651}, {'id': 174987524, 'amount': 180, 'oldcard': 33935973, 'newcard': 49641346}, {'id': 174959967, 'amount': 100, 'oldcard': 49077540, 'newcard': 49637185}, {'id': 174959882, 'amount': 175, 'oldcard': 49130846, 'newcard': 49642261}, {'id': 174959883, 'amount': 175, 'oldcard': 49130846, 'newcard': 49642261}, {'id': 174919848, 'amount': 135, 'oldcard': 33933350, 'newcard': 49641307}, {'id': 174875512, 'amount': 110, 'oldcard': 33934957, 'newcard': 49641897}, {'id': 174875493, 'amount': 150, 'oldcard': 33935485, 'newcard': 49642103}, {'id': 174867622, 'amount': 196, 'oldcard': 43178913, 'newcard': 49641769}, {'id': 174867605, 'amount': 80, 'oldcard': 33933254, 'newcard': 49642590}, {'id': 174849460, 'amount': 300, 'oldcard': 33935517, 'newcard': 49641794}, {'id': 174781218, 'amount': 280, 'oldcard': 33934337, 'newcard': 49641243}, {'id': 174777067, 'amount': 25, 'oldcard': 49075617, 'newcard': 49642391}, {'id': 174749961, 'amount': 35, 'oldcard': 33931848, 'newcard': 49639740}, {'id': 174682696, 'amount': 50, 'oldcard': 49091791, 'newcard': 49641888}, {'id': 174605093, 'amount': 25, 'oldcard': 43178958, 'newcard': 49641490}, {'id': 174603322, 'amount': 280, 'oldcard': 33933642, 'newcard': 49642285}, {'id': 174559300, 'amount': 40, 'oldcard': 45236627, 'newcard': 49640502}, {'id': 174546821, 'amount': 196, 'oldcard': 43071481, 'newcard': 49641834}, {'id': 174546793, 'amount': 530, 'oldcard': 33934696, 'newcard': 49641909}, {'id': 174546794, 'amount': 530, 'oldcard': 43105235, 'newcard': 49641909}, {'id': 174545593, 'amount': 25, 'oldcard': 33932337, 'newcard': 49639616}, {'id': 174544408, 'amount': 147, 'oldcard': 43107483, 'newcard': 49641669}, {'id': 174540973, 'amount': 50, 'oldcard': 33932337, 'newcard': 49639616}, {'id': 174525568, 'amount': 150, 'oldcard': 33932300, 'newcard': 49641160}, {'id': 174459846, 'amount': 330, 'oldcard': 33935945, 'newcard': 49640999}, {'id': 174459840, 'amount': 280, 'oldcard': 33935945, 'newcard': 49640999}, {'id': 174444529, 'amount': 125, 'oldcard': 43179085, 'newcard': 49642480}, {'id': 174444471, 'amount': 280, 'oldcard': 33934207, 'newcard': 49641147}, {'id': 174415564, 'amount': 40, 'oldcard': 49048131, 'newcard': 49642656}, {'id': 174412757, 'amount': 150, 'oldcard': 33935903, 'newcard': 49638693}, {'id': 174412725, 'amount': 175, 'oldcard': 33935927, 'newcard': 49641391}, {'id': 174410659, 'amount': 330, 'oldcard': 33932887, 'newcard': 49641240}, {'id': 174405919, 'amount': 150, 'oldcard': 33931687, 'newcard': 49640864}, {'id': 174405787, 'amount': 75, 'oldcard': 33931687, 'newcard': 49640864}]
+
+
+print(changetrans)
+print(len(changetrans))
+
+result = {}
+
+for i in changetrans:
+    oldcard = i["oldcard"]
+    amount = i["amount"]
+    # newcard = i["newcard"]
+    if oldcard in result:
+        result[oldcard]["amount"] += amount
+    else:
+        result[oldcard] = {"oldcard": oldcard, "newcard": i["newcard"], "amount": amount}
+
+for key in result:
+    print(f'''update loyalty_cards set balance = {result[key]["amount"]} where id = {result[key]["newcard"]};''')
+    # print([result[key]["oldcard"], result[key]["newcard"], result[key]["amount"]])
+
+# print(result)
+print(len(result))
+
+# for i in range(len(changetrans)):
+#     print(f'''update loyalty_transactions set loyalty_card_id = {changetrans[i]["newcard"]} where loyalty_card_id = {changetrans[i]["oldcard"]};''')
+
